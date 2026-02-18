@@ -19,6 +19,7 @@ interface RadarContainerProps {
   destinationAngle?: number;
   destinationColor?: string;
   destinationName?: string;
+  heading?: number | null;
 }
 
 export const RadarContainer: React.FC<RadarContainerProps> = ({
@@ -29,6 +30,7 @@ export const RadarContainer: React.FC<RadarContainerProps> = ({
   destinationAngle,
   destinationColor,
   destinationName,
+  heading = 0,
 }) => {
   const rings = [0.25, 0.5, 0.75, 1.0];
 
@@ -52,7 +54,7 @@ export const RadarContainer: React.FC<RadarContainerProps> = ({
         <RadarGrid size={size} />
 
         {/* North indicator */}
-        <NorthIndicator size={size} />
+        <NorthIndicator size={size} heading={heading || 0} />
 
         {/* Direction arrow */}
         <DirectionArrow size={size} rotation={relativeAngle} />

@@ -67,6 +67,7 @@ export const RadarNavigationScreen: React.FC<RadarNavigationScreenProps> = ({
             destinationAngle={radarData.relativeAngle}
             destinationColor={dotColor}
             destinationName={spot.nameJa}
+            heading={radarData.heading}
           />
         </View>
         <View style={styles.controlsContainer}>

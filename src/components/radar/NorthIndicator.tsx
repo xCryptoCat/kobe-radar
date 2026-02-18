@@ -4,9 +4,10 @@ import { theme } from '../../constants/theme';
 
 interface NorthIndicatorProps {
   size: number;
+  heading: number; // Current compass heading in degrees
 }
 
-export const NorthIndicator: React.FC<NorthIndicatorProps> = ({ size }) => {
+export const NorthIndicator: React.FC<NorthIndicatorProps> = ({ size, heading }) => {
   const center = size / 2;
   const radius = size / 2;
   const indicatorDistance = radius - 25; // Position inside the radar
@@ -23,8 +24,12 @@ export const NorthIndicator: React.FC<NorthIndicatorProps> = ({ size }) => {
     ${northX + arrowSize / 2},${northY}
   `;
 
+  // Rotate the entire group to point to true north
+  // Negative heading because we want to counter-rotate
+  const rotation = -heading;
+
   return (
-    <G>
+    <G transform={`rotate(${rotation} ${center} ${center})`}>
       {/* North arrow */}
       <Polygon
         points={arrowPoints}
