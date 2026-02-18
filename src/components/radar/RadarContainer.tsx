@@ -7,6 +7,7 @@ import { DirectionArrow } from './DirectionArrow';
 import { TargetDot } from './TargetDot';
 import { DestinationDot } from './DestinationDot';
 import { RadarPulse } from './RadarPulse';
+import { NorthIndicator } from './NorthIndicator';
 import { ProximityZone } from '../../types/radar';
 import { theme } from '../../constants/theme';
 
@@ -49,6 +50,9 @@ export const RadarContainer: React.FC<RadarContainerProps> = ({
 
         {/* Grid crosshairs */}
         <RadarGrid size={size} />
+
+        {/* North indicator */}
+        <NorthIndicator size={size} />
 
         {/* Direction arrow */}
         <DirectionArrow size={size} rotation={relativeAngle} />

@@ -3,10 +3,10 @@ import { Spot } from '../types/spot';
 export const KOBE_SPOTS: Spot[] = [
   {
     id: 'meriken-park',
-    nameEn: 'Meriken Park',
+    nameEn: 'oaka castil',
     nameJa: 'メリケンパーク',
-    latitude: 34.68253390371254,
-    longitude: 135.18864813977856,
+    latitude: 34.68752963306742,
+    longitude: 135.52582568155086,
     color: '#FF6B9D',
   },
   {
