@@ -5,16 +5,16 @@ export const KOBE_SPOTS: Spot[] = [
     id: 'meriken-park',
     nameEn: 'Meriken Park',
     nameJa: 'メリケンパーク',
-    latitude: 34.68238159523658,
-    longitude: 135.18868981687186,
+    latitude: 34.68253390371254,
+    longitude: 135.18864813977856,
     color: '#FF6B9D',
   },
   {
     id: 'nankinmachi',
     nameEn: 'Nankinmachi',
     nameJa: '南京町',
-    latitude: 34.6877,
-    longitude: 135.1761,
+    latitude: 34.688245915745746,
+    longitude: 135.18810907735565,
     color: '#C44569',
   },
   {
@@ -81,4 +81,5 @@ export const KOBE_SPOTS: Spot[] = [
     longitude: 135.1768,
     color: '#FD79A8',
   },
-];
+
+]; 

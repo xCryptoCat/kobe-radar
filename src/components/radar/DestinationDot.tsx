@@ -115,14 +115,6 @@ export const DestinationDot: React.FC<DestinationDotProps> = ({
         opacity={pulseOpacity}
       />
 
-      {/* Outer glow circle */}
-      <Circle
-        cx={x}
-        cy={y}
-        r={outerDotRadius}
-        fill={color}
-        opacity={0.4}
-      />
       {/* Inner solid circle */}
       <Circle
         cx={x}
