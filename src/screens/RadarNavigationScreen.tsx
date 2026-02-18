@@ -60,7 +60,6 @@ export const RadarNavigationScreen: React.FC<RadarNavigationScreenProps> = ({
         </View>
         <View style={styles.radarContainer}>
           <RadarContainer
-            relativeAngle={radarData.relativeAngle}
             proximityZone={radarData.proximityZone}
             size={300}
             destinationDistance={radarData.distance}

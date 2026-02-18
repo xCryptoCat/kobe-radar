@@ -11,15 +11,21 @@ const Particle: React.FC<ParticleProps> = ({ angle, delay }) => {
   const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.sequence([
+    const animation = Animated.sequence([
       Animated.delay(delay),
       Animated.timing(progress, {
         toValue: 1,
         duration: 600,
         useNativeDriver: true,
       }),
-    ]).start();
-  }, [delay, progress]);
+    ]);
+
+    animation.start();
+
+    return () => {
+      animation.stop(); // Cancel animation on unmount to prevent memory leaks
+    };
+  }, []); // Fixed: Removed refs from dependency array, added cleanup
 
   const distance = 60;
   const radian = (angle * Math.PI) / 180;

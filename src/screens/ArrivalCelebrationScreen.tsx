@@ -36,7 +36,6 @@ export const ArrivalCelebrationScreen: React.FC<
         {/* Static radar backdrop */}
         <View style={styles.backdropContainer}>
           <RadarContainer
-            relativeAngle={0}
             proximityZone="arrived"
             size={300}
           />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, G, Polygon } from 'react-native-svg';
 import { theme } from '../../constants/theme';
 
@@ -7,7 +7,7 @@ interface NorthIndicatorProps {
   heading: number; // Current compass heading in degrees
 }
 
-export const NorthIndicator: React.FC<NorthIndicatorProps> = ({ size, heading }) => {
+export const NorthIndicator: React.FC<NorthIndicatorProps> = React.memo(({ size, heading }) => {
   const center = size / 2;
   const radius = size / 2;
   const indicatorDistance = radius - 25; // Position inside the radar
@@ -24,9 +24,16 @@ export const NorthIndicator: React.FC<NorthIndicatorProps> = ({ size, heading })
     ${northX + arrowSize / 2},${northY}
   `;
 
+  // Validate and normalize heading value
   // Rotate the entire group to point to true north
   // Negative heading because we want to counter-rotate
-  const rotation = -heading;
+  const rotation = useMemo(() => {
+    if (!Number.isFinite(heading)) {
+      console.warn('NorthIndicator: Invalid heading value', heading);
+      return 0;
+    }
+    return -(((heading % 360) + 360) % 360); // Normalize and negate
+  }, [heading]);
 
   return (
     <G transform={`rotate(${rotation} ${center} ${center})`}>
@@ -51,4 +58,4 @@ export const NorthIndicator: React.FC<NorthIndicatorProps> = ({ size, heading })
       </Text>
     </G>
   );
-};
+});

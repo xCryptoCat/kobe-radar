@@ -1,62 +1,34 @@
 import { useState, useEffect } from 'react';
-import { Magnetometer } from 'expo-sensors';
-
-const ALPHA = 0.15; // Low-pass filter coefficient
+import * as Location from 'expo-location';
 
 /**
- * Convert magnetometer data to heading in degrees
+ * Compass hook using the OS heading API (Location.watchHeadingAsync).
+ *
+ * This is fundamentally more accurate than raw magnetometer atan2 because
+ * the OS fuses magnetometer + accelerometer + gyroscope data to produce
+ * a tilt-compensated, sensor-fused heading. Raw magnetometer heading drifts
+ * 20-40° when the phone isn't perfectly flat.
+ *
+ * Returns trueHeading (corrected for magnetic declination) when available,
+ * otherwise falls back to magHeading (magnetic north).
  */
-const calculateHeading = (x: number, y: number): number => {
-  let angle = Math.atan2(y, x) * (180 / Math.PI);
-  // Normalize to 0-360
-  return (angle + 360) % 360;
-};
-
-/**
- * Low-pass filter for smooth heading updates
- */
-const applyLowPassFilter = (
-  currentValue: number,
-  newValue: number,
-  alpha: number
-): number => {
-  // Handle angle wrapping (359 -> 1 should filter to 0, not 180)
-  let diff = newValue - currentValue;
-  if (diff > 180) diff -= 360;
-  if (diff < -180) diff += 360;
-
-  const filtered = currentValue + alpha * diff;
-  return (filtered + 360) % 360;
-};
-
 export const useCompass = () => {
   const [heading, setHeading] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let subscription: { remove: () => void } | null = null;
-    let filteredHeading: number | null = null;
+    let subscription: Location.LocationSubscription | null = null;
 
     const startCompass = async () => {
       try {
-        const isAvailable = await Magnetometer.isAvailableAsync();
-        if (!isAvailable) {
-          setError('Magnetometer not available on this device');
-          return;
-        }
-
-        Magnetometer.setUpdateInterval(100);
-
-        subscription = Magnetometer.addListener((data) => {
-          const rawHeading = calculateHeading(data.x, data.y);
-
-          if (filteredHeading === null) {
-            filteredHeading = rawHeading;
-          } else {
-            filteredHeading = applyLowPassFilter(filteredHeading, rawHeading, ALPHA);
-          }
-
-          setHeading(filteredHeading);
+        subscription = await Location.watchHeadingAsync((headingData) => {
+          // trueHeading: relative to true north (accounts for magnetic declination)
+          // magHeading: relative to magnetic north
+          // trueHeading is -1 when unavailable (no GPS fix yet for declination)
+          const h = headingData.trueHeading >= 0
+            ? headingData.trueHeading
+            : headingData.magHeading;
+          setHeading(h);
           setError(null);
         });
       } catch (err) {

@@ -9,7 +9,7 @@ interface TargetDotProps {
   size: number;
 }
 
-export const TargetDot: React.FC<TargetDotProps> = ({ size }) => {
+export const TargetDot: React.FC<TargetDotProps> = React.memo(({ size }) => {
   const center = size / 2;
   const dotRadius = 8;
 
@@ -51,7 +51,7 @@ export const TargetDot: React.FC<TargetDotProps> = ({ size }) => {
     return () => {
       pulse.stop();
     };
-  }, [pulseScale, pulseOpacity]);
+  }, []); // Fixed: Removed Animated refs from dependency array
 
   const pulseRadius = pulseScale.interpolate({
     inputRange: [1, 2.5],
@@ -89,4 +89,4 @@ export const TargetDot: React.FC<TargetDotProps> = ({ size }) => {
       />
     </G>
   );
-};
+});

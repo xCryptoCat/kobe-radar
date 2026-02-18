@@ -23,7 +23,7 @@ const getColorForZone = (zone: ProximityZone): string => {
   }
 };
 
-export const RadarCircle: React.FC<RadarCircleProps> = ({
+export const RadarCircle: React.FC<RadarCircleProps> = React.memo(({
   size,
   radius,
   proximityZone,
@@ -42,4 +42,4 @@ export const RadarCircle: React.FC<RadarCircleProps> = ({
       opacity={0.6}
     />
   );
-};
+});

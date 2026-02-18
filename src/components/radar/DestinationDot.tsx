@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Animated } from 'react-native';
 import { Circle, G, Rect, Text } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
@@ -15,7 +15,7 @@ interface DestinationDotProps {
   spotName: string;
 }
 
-export const DestinationDot: React.FC<DestinationDotProps> = ({
+export const DestinationDot: React.FC<DestinationDotProps> = React.memo(({
   size,
   distance,
   relativeAngle,
@@ -29,9 +29,12 @@ export const DestinationDot: React.FC<DestinationDotProps> = ({
   const outerDotRadius = 12;
   const innerDotRadius = 10;
 
-  // Calculate position using polar to cartesian conversion
-  const scaledRadius = calculateRadarPosition(distance, maxRadius);
-  const { x, y } = polarToCartesian(center, scaledRadius, relativeAngle);
+  const position = useMemo(() => {
+    const scaledRadius = calculateRadarPosition(distance, maxRadius);
+    return polarToCartesian(center, scaledRadius, relativeAngle);
+  }, [distance, relativeAngle, center, maxRadius]);
+
+  const { x, y } = position;
 
   // Pulse animation
   const pulseScale = useRef(new Animated.Value(1)).current;
@@ -72,7 +75,7 @@ export const DestinationDot: React.FC<DestinationDotProps> = ({
     return () => {
       pulse.stop();
     };
-  }, [pulseScale, pulseOpacity]);
+  }, []); // Fixed: Removed Animated refs from dependency array
 
   const pulseRadius = pulseScale.interpolate({
     inputRange: [1, 2.0],
@@ -95,10 +98,17 @@ export const DestinationDot: React.FC<DestinationDotProps> = ({
     }
   }, [showTooltip]);
 
-  // Tooltip dimensions
+  // Tooltip dimensions with better Japanese text handling
   const tooltipPadding = 8;
   const tooltipHeight = 30;
-  const estimatedTextWidth = spotName.length * 8 + tooltipPadding * 2;
+
+  // Better estimation for Japanese text (uses wider character width)
+  const estimatedTextWidth = useMemo(() => {
+    // Japanese characters are wider; use conservative estimate
+    const avgCharWidth = /[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/.test(spotName) ? 12 : 8;
+    return spotName.length * avgCharWidth + tooltipPadding * 2;
+  }, [spotName, tooltipPadding]);
+
   const tooltipX = x - estimatedTextWidth / 2;
   const tooltipY = y - tooltipHeight - 10; // Position above dot
 
@@ -152,4 +162,4 @@ export const DestinationDot: React.FC<DestinationDotProps> = ({
       )}
     </G>
   );
-};
+});

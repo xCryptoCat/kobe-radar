@@ -9,7 +9,7 @@ interface RadarPulseProps {
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-export const RadarPulse: React.FC<RadarPulseProps> = ({ size }) => {
+export const RadarPulse: React.FC<RadarPulseProps> = React.memo(({ size }) => {
   const center = size / 2;
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(0.8)).current;
@@ -49,7 +49,7 @@ export const RadarPulse: React.FC<RadarPulseProps> = ({ size }) => {
     return () => {
       pulse.stop();
     };
-  }, [scale, opacity]);
+  }, []); // Fixed: Removed Animated refs from dependency array
 
   // Calculate radius based on scale
   const radius = scale.interpolate({
@@ -76,7 +76,7 @@ export const RadarPulse: React.FC<RadarPulseProps> = ({ size }) => {
       />
     </Svg>
   );
-};
+});
 
 const styles = StyleSheet.create({
   svg: {

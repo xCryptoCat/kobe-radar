@@ -82,13 +82,53 @@ export const calculateRelativeAngle = (
  * Determine proximity zone based on distance
  */
 export const getProximityZone = (distanceMeters: number): ProximityZone => {
-  if (distanceMeters < 100) return 'arrived';
+  if (distanceMeters < ARRIVAL_THRESHOLD) return 'arrived';
   if (distanceMeters < 200) return 'near';
   if (distanceMeters < 500) return 'medium';
   return 'far';
 };
 
 /**
+ * Determine proximity zone with hysteresis to prevent flickering
+ * Hysteresis prevents rapid zone changes when distance oscillates near boundaries
+ */
+export const getProximityZoneWithHysteresis = (
+  distanceMeters: number,
+  previousZone?: ProximityZone
+): ProximityZone => {
+  const HYSTERESIS_MARGIN = 10; // 10 meters — matches typical urban GPS drift (±5-15m)
+
+  // Define zone boundaries with hysteresis
+  const zones = {
+    arrived: { enter: ARRIVAL_THRESHOLD, exit: ARRIVAL_THRESHOLD + HYSTERESIS_MARGIN },
+    near: { enter: 200, exit: 200 + HYSTERESIS_MARGIN },
+    medium: { enter: 500, exit: 500 + HYSTERESIS_MARGIN },
+  };
+
+  // Check if staying in current zone (with hysteresis)
+  if (previousZone) {
+    switch (previousZone) {
+      case 'arrived':
+        if (distanceMeters < zones.arrived.exit) return 'arrived';
+        break;
+      case 'near':
+        if (distanceMeters >= zones.arrived.exit && distanceMeters < zones.near.exit) return 'near';
+        break;
+      case 'medium':
+        if (distanceMeters >= zones.near.exit && distanceMeters < zones.medium.exit) return 'medium';
+        break;
+    }
+  }
+
+  // Determine new zone (entering thresholds)
+  if (distanceMeters < zones.arrived.enter) return 'arrived';
+  if (distanceMeters < zones.near.enter) return 'near';
+  if (distanceMeters < zones.medium.enter) return 'medium';
+  return 'far';
+};
+
+/**
  * Arrival threshold in meters
+ * 100m accounts for urban GPS drift in Kobe
  */
 export const ARRIVAL_THRESHOLD = 100;

@@ -6,7 +6,7 @@ interface RadarGridProps {
   size: number;
 }
 
-export const RadarGrid: React.FC<RadarGridProps> = ({ size }) => {
+export const RadarGrid: React.FC<RadarGridProps> = React.memo(({ size }) => {
   const center = size / 2;
 
   return (
@@ -31,4 +31,4 @@ export const RadarGrid: React.FC<RadarGridProps> = ({ size }) => {
       />
     </>
   );
-};
+});

@@ -12,7 +12,6 @@ import { ProximityZone } from '../../types/radar';
 import { theme } from '../../constants/theme';
 
 interface RadarContainerProps {
-  relativeAngle: number;
   proximityZone: ProximityZone;
   size?: number;
   destinationDistance?: number;
@@ -22,8 +21,9 @@ interface RadarContainerProps {
   heading?: number | null;
 }
 
-export const RadarContainer: React.FC<RadarContainerProps> = ({
-  relativeAngle,
+const RADAR_RINGS = [0.25, 0.5, 0.75, 1.0];
+
+export const RadarContainer: React.FC<RadarContainerProps> = React.memo(({
   proximityZone,
   size = 300,
   destinationDistance,
@@ -32,8 +32,6 @@ export const RadarContainer: React.FC<RadarContainerProps> = ({
   destinationName,
   heading = 0,
 }) => {
-  const rings = [0.25, 0.5, 0.75, 1.0];
-
   return (
     <View style={styles.container}>
       {/* Radar pulse wave animation */}
@@ -41,7 +39,7 @@ export const RadarContainer: React.FC<RadarContainerProps> = ({
 
       <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {/* Concentric circles */}
-        {rings.map((ratio, index) => (
+        {RADAR_RINGS.map((ratio, index) => (
           <RadarCircle
             key={index}
             size={size}
@@ -54,9 +52,9 @@ export const RadarContainer: React.FC<RadarContainerProps> = ({
         <RadarGrid size={size} />
 
         {/* North indicator */}
-        <NorthIndicator size={size} heading={heading || 0} />
+        <NorthIndicator size={size} heading={heading ?? 0} />
 
-        {/* Direction arrow - always points up to show which way you're facing */}
+        {/* Direction arrow — always points up (your facing direction) */}
         <DirectionArrow size={size} rotation={0} />
 
         {/* Center target dot */}
@@ -78,7 +76,7 @@ export const RadarContainer: React.FC<RadarContainerProps> = ({
       </Svg>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {
