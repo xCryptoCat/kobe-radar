@@ -1,11 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withDelay,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated } from 'react-native';
 import { theme } from '../../constants/theme';
 
 interface CompletionOverlayProps {
@@ -15,25 +9,35 @@ interface CompletionOverlayProps {
 export const CompletionOverlay: React.FC<CompletionOverlayProps> = ({
   spotName,
 }) => {
-  const scale = useSharedValue(0);
-  const opacity = useSharedValue(0);
+  const scale = useRef(new Animated.Value(0)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    scale.value = withDelay(
-      200,
-      withSpring(1, { damping: 10, stiffness: 100 })
-    );
-    opacity.value = withDelay(200, withSpring(1));
+    Animated.parallel([
+      Animated.timing(scale, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, [scale, opacity]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.content, animatedStyle]}>
+      <Animated.View
+        style={[
+          styles.content,
+          {
+            transform: [{ scale }],
+            opacity,
+          },
+        ]}
+      >
         <Text style={styles.celebrationText}>探索コンプリート!</Text>
         <Text style={styles.spotName}>{spotName}発見!</Text>
       </Animated.View>

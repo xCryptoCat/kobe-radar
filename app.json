@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Kobe Radar",
-    "slug": "kobe-radar",
+    "name": "探検レーダー",
+    "slug": "tanken-radar",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,15 +14,15 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.koberadar.app",
+      "bundleIdentifier": "com.tankenradar.app",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "This app needs your location to guide you to destinations using the radar.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs your location to guide you to destinations using the radar.",
+        "NSLocationWhenInUseUsageDescription": "探検レーダーがレーダーを使用して目的地に案内するために、位置情報が必要です。",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "探検レーダーがレーダーを使用して目的地に案内するために、位置情報が必要です。",
         "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511"
       }
     },
     "android": {
-      "package": "com.koberadar.app",
+      "package": "com.tankenradar.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0D0D0D"
@@ -41,7 +41,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow Kobe Radar to use your location to guide you to destinations."
+          "locationAlwaysAndWhenInUsePermission": "探検レーダーがあなたの位置情報を使用して目的地に案内できるようにします。"
         }
       ],
       [

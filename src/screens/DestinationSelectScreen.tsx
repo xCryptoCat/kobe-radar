@@ -25,7 +25,7 @@ export const DestinationSelectScreen: React.FC<DestinationSelectScreenProps> = (
   };
 
   const handleStampCardPress = () => {
-    navigation.navigate('StampCard');
+    navigation.navigate('StampsTab', { screen: 'StampCard' });
   };
 
   return (

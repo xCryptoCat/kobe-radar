@@ -28,16 +28,15 @@ export const useRadar = (
   // Debounced arrival detection (3 seconds sustained)
   const arrivalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasTriggeredArrivalRef = useRef(false);
+  const onArrivalRef = useRef(onArrival);
+
+  // Update ref when callback changes
+  useEffect(() => {
+    onArrivalRef.current = onArrival;
+  }, [onArrival]);
 
   useEffect(() => {
     if (!userLocation) {
-      setRadarData({
-        distance: 0,
-        relativeAngle: 0,
-        proximityZone: 'far',
-        userLocation: null,
-        heading,
-      });
       return;
     }
 
@@ -48,12 +47,22 @@ export const useRadar = (
       : 0;
     const proximityZone = getProximityZone(distance);
 
-    setRadarData({
-      distance,
-      relativeAngle,
-      proximityZone,
-      userLocation,
-      heading,
+    setRadarData((prev) => {
+      // Only update if values changed significantly
+      const distanceChanged = Math.abs(prev.distance - distance) > 1;
+      const angleChanged = Math.abs(prev.relativeAngle - relativeAngle) > 1;
+      const zoneChanged = prev.proximityZone !== proximityZone;
+
+      if (distanceChanged || angleChanged || zoneChanged || !prev.userLocation) {
+        return {
+          distance,
+          relativeAngle,
+          proximityZone,
+          userLocation,
+          heading,
+        };
+      }
+      return prev;
     });
 
     // Arrival detection with debounce
@@ -61,7 +70,7 @@ export const useRadar = (
       if (!arrivalTimeoutRef.current) {
         arrivalTimeoutRef.current = setTimeout(() => {
           hasTriggeredArrivalRef.current = true;
-          onArrival?.();
+          onArrivalRef.current?.();
         }, 3000);
       }
     } else if (distance >= ARRIVAL_THRESHOLD) {
@@ -71,7 +80,7 @@ export const useRadar = (
         arrivalTimeoutRef.current = null;
       }
     }
-  }, [userLocation, heading, targetCoords, onArrival]);
+  }, [userLocation, heading, targetCoords]);
 
   // Cleanup
   useEffect(() => {

@@ -40,8 +40,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.md,
     backgroundColor: theme.colors.background.secondary,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.accent.cyan,
   },
   backButton: {
     padding: theme.spacing.sm,

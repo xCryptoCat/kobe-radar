@@ -23,7 +23,7 @@ export const ArrivalCelebrationScreen: React.FC<
   }, [spot.id, markVisited]);
 
   const handleGoToStampCard = () => {
-    navigation.navigate('StampCard');
+    navigation.navigate('StampsTab', { screen: 'StampCard' });
   };
 
   const handleTakePhoto = () => {
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
-    opacity: 0.3,
+    opacity: 0.15,
   },
   overlayContainer: {
     flex: 1,

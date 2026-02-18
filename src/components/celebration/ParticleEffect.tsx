@@ -1,11 +1,5 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withDelay,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, Animated } from 'react-native';
 import { theme } from '../../constants/theme';
 
 interface ParticleProps {
@@ -14,35 +8,52 @@ interface ParticleProps {
 }
 
 const Particle: React.FC<ParticleProps> = ({ angle, delay }) => {
-  const progress = useSharedValue(0);
+  const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    progress.value = withDelay(
-      delay,
-      withTiming(1, { duration: 1000 })
-    );
+    Animated.sequence([
+      Animated.delay(delay),
+      Animated.timing(progress, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, [delay, progress]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    const distance = 100 * progress.value;
-    const radian = (angle * Math.PI) / 180;
-    const translateX = Math.cos(radian) * distance;
-    const translateY = Math.sin(radian) * distance;
-
-    return {
-      transform: [{ translateX }, { translateY }],
-      opacity: 1 - progress.value,
-    };
+  const distance = 60;
+  const radian = (angle * Math.PI) / 180;
+  const translateX = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, Math.cos(radian) * distance],
+  });
+  const translateY = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, Math.sin(radian) * distance],
+  });
+  const opacity = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
   });
 
-  return <Animated.View style={[styles.particle, animatedStyle]} />;
+  return (
+    <Animated.View
+      style={[
+        styles.particle,
+        {
+          transform: [{ translateX }, { translateY }],
+          opacity,
+        },
+      ]}
+    />
+  );
 };
 
 export const ParticleEffect: React.FC = () => {
-  const particleCount = 20;
+  const particleCount = 8;
   const particles = Array.from({ length: particleCount }, (_, i) => ({
     angle: (360 / particleCount) * i,
-    delay: i * 20,
+    delay: 0,
   }));
 
   return (
@@ -63,9 +74,10 @@ const styles = StyleSheet.create({
   },
   particle: {
     position: 'absolute',
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: theme.colors.accent.cyan,
+    opacity: 0.8,
   },
 });

@@ -5,8 +5,8 @@ export const KOBE_SPOTS: Spot[] = [
     id: 'meriken-park',
     nameEn: 'Meriken Park',
     nameJa: 'メリケンパーク',
-    latitude: 34.6843,
-    longitude: 135.1862,
+    latitude: 34.68238159523658,
+    longitude: 135.18868981687186,
     color: '#FF6B9D',
   },
   {
