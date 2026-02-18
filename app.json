@@ -1,30 +1,56 @@
 {
   "expo": {
-    "name": "temp-expo",
-    "slug": "temp-expo",
+    "name": "Kobe Radar",
+    "slug": "kobe-radar",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#0D0D0D"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.koberadar.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs your location to guide you to destinations using the radar.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs your location to guide you to destinations using the radar.",
+        "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511"
+      }
     },
     "android": {
+      "package": "com.koberadar.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0D0D0D"
       },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Kobe Radar to use your location to guide you to destinations."
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511"
+        }
+      ]
+    ]
   }
 }
