@@ -7,6 +7,7 @@ import { BannerAdWrapper } from '../components/common/BannerAdWrapper';
 import { RadarContainer } from '../components/radar/RadarContainer';
 import { RadarNavigationScreenProps } from '../types/navigation';
 import { useRadar } from '../hooks/useRadar';
+import { useSpotStore } from '../store/spotStore';
 import { formatDistance, formatCoordinates } from '../utils/format';
 import { theme } from '../constants/theme';
 import * as Haptics from 'expo-haptics';
@@ -26,6 +27,11 @@ export const RadarNavigationScreen: React.FC<RadarNavigationScreenProps> = ({
     { latitude: spot.latitude, longitude: spot.longitude },
     handleArrival
   );
+
+  // Check if destination is visited and determine dot color
+  const { isVisited } = useSpotStore();
+  const visited = isVisited(spot.id);
+  const dotColor = visited ? theme.colors.status.visited : spot.color;
 
   const handleCancel = () => {
     navigation.goBack();
@@ -57,6 +63,10 @@ export const RadarNavigationScreen: React.FC<RadarNavigationScreenProps> = ({
             relativeAngle={radarData.relativeAngle}
             proximityZone={radarData.proximityZone}
             size={300}
+            destinationDistance={radarData.distance}
+            destinationAngle={radarData.relativeAngle}
+            destinationColor={dotColor}
+            destinationName={spot.nameJa}
           />
         </View>
         <View style={styles.controlsContainer}>

@@ -5,6 +5,7 @@ import { RadarCircle } from './RadarCircle';
 import { RadarGrid } from './RadarGrid';
 import { DirectionArrow } from './DirectionArrow';
 import { TargetDot } from './TargetDot';
+import { DestinationDot } from './DestinationDot';
 import { ProximityZone } from '../../types/radar';
 import { theme } from '../../constants/theme';
 
@@ -12,12 +13,20 @@ interface RadarContainerProps {
   relativeAngle: number;
   proximityZone: ProximityZone;
   size?: number;
+  destinationDistance?: number;
+  destinationAngle?: number;
+  destinationColor?: string;
+  destinationName?: string;
 }
 
 export const RadarContainer: React.FC<RadarContainerProps> = ({
   relativeAngle,
   proximityZone,
   size = 300,
+  destinationDistance,
+  destinationAngle,
+  destinationColor,
+  destinationName,
 }) => {
   const rings = [0.25, 0.5, 0.75, 1.0];
 
@@ -42,6 +51,20 @@ export const RadarContainer: React.FC<RadarContainerProps> = ({
 
         {/* Center target dot */}
         <TargetDot size={size} />
+
+        {/* Destination dot (optional) */}
+        {destinationDistance !== undefined &&
+          destinationAngle !== undefined &&
+          destinationColor &&
+          destinationName && (
+            <DestinationDot
+              size={size}
+              distance={destinationDistance}
+              relativeAngle={destinationAngle}
+              color={destinationColor}
+              spotName={destinationName}
+            />
+          )}
       </Svg>
     </View>
   );
