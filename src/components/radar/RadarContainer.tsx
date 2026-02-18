@@ -56,8 +56,8 @@ export const RadarContainer: React.FC<RadarContainerProps> = ({
         {/* North indicator */}
         <NorthIndicator size={size} heading={heading || 0} />
 
-        {/* Direction arrow */}
-        <DirectionArrow size={size} rotation={relativeAngle} />
+        {/* Direction arrow - always points up to show which way you're facing */}
+        <DirectionArrow size={size} rotation={0} />
 
         {/* Center target dot */}
         <TargetDot size={size} />
