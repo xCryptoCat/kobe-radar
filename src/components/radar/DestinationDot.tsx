@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Animated } from 'react-native';
 import { Circle, G, Rect, Text } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { calculateRadarPosition, polarToCartesian } from '../../utils/radarPosition';
 import { theme } from '../../constants/theme';
+
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 interface DestinationDotProps {
   size: number;
@@ -30,6 +33,52 @@ export const DestinationDot: React.FC<DestinationDotProps> = ({
   const scaledRadius = calculateRadarPosition(distance, maxRadius);
   const { x, y } = polarToCartesian(center, scaledRadius, relativeAngle);
 
+  // Pulse animation
+  const pulseScale = useRef(new Animated.Value(1)).current;
+  const pulseOpacity = useRef(new Animated.Value(0.8)).current;
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.parallel([
+        Animated.sequence([
+          Animated.timing(pulseScale, {
+            toValue: 2.0,
+            duration: 1800,
+            useNativeDriver: false,
+          }),
+          Animated.timing(pulseScale, {
+            toValue: 1,
+            duration: 0,
+            useNativeDriver: false,
+          }),
+        ]),
+        Animated.sequence([
+          Animated.timing(pulseOpacity, {
+            toValue: 0,
+            duration: 1800,
+            useNativeDriver: false,
+          }),
+          Animated.timing(pulseOpacity, {
+            toValue: 0.8,
+            duration: 0,
+            useNativeDriver: false,
+          }),
+        ]),
+      ])
+    );
+
+    pulse.start();
+
+    return () => {
+      pulse.stop();
+    };
+  }, [pulseScale, pulseOpacity]);
+
+  const pulseRadius = pulseScale.interpolate({
+    inputRange: [1, 2.0],
+    outputRange: [innerDotRadius, innerDotRadius * 2.0],
+  });
+
   // Handle tap interaction
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -55,6 +104,17 @@ export const DestinationDot: React.FC<DestinationDotProps> = ({
 
   return (
     <G onPress={handlePress}>
+      {/* Animated pulse ring */}
+      <AnimatedCircle
+        cx={x}
+        cy={y}
+        r={pulseRadius}
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        opacity={pulseOpacity}
+      />
+
       {/* Outer glow circle */}
       <Circle
         cx={x}

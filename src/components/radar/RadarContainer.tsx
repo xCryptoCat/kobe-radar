@@ -6,6 +6,7 @@ import { RadarGrid } from './RadarGrid';
 import { DirectionArrow } from './DirectionArrow';
 import { TargetDot } from './TargetDot';
 import { DestinationDot } from './DestinationDot';
+import { RadarPulse } from './RadarPulse';
 import { ProximityZone } from '../../types/radar';
 import { theme } from '../../constants/theme';
 
@@ -32,6 +33,9 @@ export const RadarContainer: React.FC<RadarContainerProps> = ({
 
   return (
     <View style={styles.container}>
+      {/* Radar pulse wave animation */}
+      <RadarPulse size={size} />
+
       <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {/* Concentric circles */}
         {rings.map((ratio, index) => (
