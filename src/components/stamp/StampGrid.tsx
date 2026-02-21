@@ -1,25 +1,38 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StampIcon } from './StampIcon';
-import { Spot } from '../../types/spot';
+import { Spot, VisitedSpotRecord } from '../../types/spot';
 import { theme } from '../../constants/theme';
 
 interface StampGridProps {
   spots: Spot[];
-  visitedSpotIds: string[];
+  visitedSpots: Record<string, VisitedSpotRecord>;
+  onStampPress?: (spot: Spot, photoUri?: string) => void;
 }
 
 export const StampGrid: React.FC<StampGridProps> = ({
   spots,
-  visitedSpotIds,
+  visitedSpots,
+  onStampPress,
 }) => {
-  const isVisited = (spotId: string) => visitedSpotIds.includes(spotId);
+  const isVisited = (spotId: string) => !!visitedSpots[spotId];
+  const hasPhoto = (spotId: string) => !!visitedSpots[spotId]?.photoUri;
+  const getPhotoUri = (spotId: string) => visitedSpots[spotId]?.photoUri;
 
   return (
     <View style={styles.container}>
       {spots.map((spot) => (
         <View key={spot.id} style={styles.stampWrapper}>
-          <StampIcon spot={spot} isVisited={isVisited(spot.id)} />
+          <StampIcon
+            spot={spot}
+            isVisited={isVisited(spot.id)}
+            hasPhoto={hasPhoto(spot.id)}
+            onPress={
+              hasPhoto(spot.id) && onStampPress
+                ? () => onStampPress(spot, getPhotoUri(spot.id))
+                : undefined
+            }
+          />
         </View>
       ))}
     </View>

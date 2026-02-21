@@ -11,6 +11,8 @@ interface SpotStore {
   isVisited: (spotId: string) => boolean;
   getVisitedCount: () => number;
   clearAllVisited: () => void;
+  savePhoto: (spotId: string, photoUri: string) => void;
+  getPhotoUri: (spotId: string) => string | undefined;
 }
 
 export const useSpotStore = create<SpotStore>()(
@@ -45,6 +47,23 @@ export const useSpotStore = create<SpotStore>()(
 
       clearAllVisited: () => {
         set({ visitedSpots: {} });
+      },
+
+      savePhoto: (spotId: string, photoUri: string) => {
+        set((state) => {
+          const existing = state.visitedSpots[spotId];
+          if (!existing) return state;
+          return {
+            visitedSpots: {
+              ...state.visitedSpots,
+              [spotId]: { ...existing, photoUri },
+            },
+          };
+        });
+      },
+
+      getPhotoUri: (spotId: string) => {
+        return get().visitedSpots[spotId]?.photoUri;
       },
     }),
     {

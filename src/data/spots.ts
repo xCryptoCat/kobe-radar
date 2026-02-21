@@ -2,6 +2,14 @@ import { Spot } from '../types/spot';
 
 export const KOBE_SPOTS: Spot[] = [
   {
+    id: 'test-FamilyMart',
+    nameEn: 'test-FamilyMart',
+    nameJa: 'ファミリーマート',
+    latitude:  34.71455176933538,
+    longitude:135.26464898246377,
+    color: '#FF6B9D',
+  },
+  {
     id: 'meriken-park',
     nameEn: 'Meriken Park',
     nameJa: 'メリケンパーク',

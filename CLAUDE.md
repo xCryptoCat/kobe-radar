@@ -85,6 +85,8 @@ StampCardScreen
 
 ### Data
 - `src/data/spots.ts` — 10 Kobe destinations with lat/lng/color (hardcoded)
+- `src/data/stampImages.ts` — Maps spot IDs to stamp image assets
+- `assets/stamps/*.png` — 10 custom stamp images (512x512px)
 
 ### Theme
 - `src/constants/theme.ts` — Dark theme (#0D0D0D) with cyan/teal neon accents
@@ -130,13 +132,42 @@ GPS accuracy: 100m arrival threshold accounts for urban GPS drift in Kobe.
 5. **Dark theme only** — App designed for nighttime exploration
 6. **Japanese text labels** — UI text is in Japanese (e.g., "探索をはじめる")
 
+## Stamp System
+
+### Stamp Images
+Each destination has a custom stamp image displayed when visited:
+- **Location**: `assets/stamps/*.png` (10 images, one per spot)
+- **Mapping**: `src/data/stampImages.ts` maps spot IDs to image files
+- **Display**: `StampIcon` component shows images when visited, first Japanese character when unvisited
+- **Size**: 60x60px display, images are 512x512px source files
+- **Background**: Colored background (spot.color) with 50x50px stamp image on top
+
+### Generating New Stamp Images
+If you need to regenerate or add stamps:
+1. Use prompts in `STAMP_IMAGE_PROMPTS.md` for AI image generators
+2. Generate 512x512px square PNG images (minimalist, bold, iconic style)
+3. Save to `assets/stamps/` with exact filenames (e.g., `meriken-park.png`)
+4. Update `src/data/stampImages.ts` if adding new spots
+5. Images automatically bundle with app via `assetBundlePatterns: ["**/*"]` in app.json
+
+### Photo Feature
+Users can take photos at each destination:
+- **Permission**: Camera permission in app.json (iOS + Android)
+- **Utility**: `src/utils/photo.ts` handles camera launch and file persistence
+- **Storage**: Photos saved to `FileSystem.documentDirectory/photos/`
+- **State**: Photo URIs stored in Zustand via `savePhoto(spotId, photoUri)`
+- **Display**: Tap visited stamp with 📷 indicator to view full-screen photo
+- **Modal**: `PhotoViewerModal` component for full-screen photo viewing
+
 ## Modifying Spot Data
 
 To add/change destinations:
 1. Edit `src/data/spots.ts`
 2. Add coordinates (use Google Maps for accuracy)
 3. Assign unique color (hex) for stamp icon
-4. Update stamp grid if changing total count (currently 5 columns for 10 spots)
+4. Generate stamp image (see Stamp System above)
+5. Update `src/data/stampImages.ts` to include new stamp image
+6. Update stamp grid if changing total count (currently 5 columns for 10 spots)
 
 ## AdMob Production Setup
 

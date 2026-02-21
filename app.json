@@ -1,5 +1,8 @@
 {
   "expo": {
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "name": "探検レーダー",
     "slug": "tanken-radar",
     "version": "1.0.0",
@@ -18,6 +21,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "探検レーダーがレーダーを使用して目的地に案内するために、位置情報が必要です。",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "探検レーダーがレーダーを使用して目的地に案内するために、位置情報が必要です。",
+        "NSCameraUsageDescription": "記念写真を撮影するためにカメラを使用します。",
         "GADApplicationIdentifier": "ca-app-pub-3940256099942544~1458002511"
       }
     },
@@ -29,7 +33,8 @@
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA"
       ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
@@ -50,7 +55,8 @@
           "androidAppId": "ca-app-pub-3940256099942544~3347511713",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511"
         }
-      ]
+      ],
+      ["expo-image-picker"]
     ]
   }
 }

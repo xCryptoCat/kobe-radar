@@ -15,4 +15,5 @@ export interface Coordinates {
 export interface VisitedSpotRecord {
   spotId: string;
   visitedAt: number;
+  photoUri?: string;
 }

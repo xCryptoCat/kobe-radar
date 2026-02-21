@@ -9,12 +9,13 @@ import { ArrivalCelebrationScreenProps } from '../types/navigation';
 import { useSpotStore } from '../store/spotStore';
 import { theme } from '../constants/theme';
 import * as Haptics from 'expo-haptics';
+import { takePhoto } from '../utils/photo';
 
 export const ArrivalCelebrationScreen: React.FC<
   ArrivalCelebrationScreenProps
 > = ({ navigation, route }) => {
   const { spot } = route.params;
-  const { markVisited } = useSpotStore();
+  const { markVisited, savePhoto } = useSpotStore();
 
   useEffect(() => {
     // Mark as visited and trigger haptic feedback
@@ -26,8 +27,12 @@ export const ArrivalCelebrationScreen: React.FC<
     navigation.navigate('StampsTab', { screen: 'StampCard' });
   };
 
-  const handleTakePhoto = () => {
-    Alert.alert('Coming Soon', 'Photo feature will be available in a future update!');
+  const handleTakePhoto = async () => {
+    const photoUri = await takePhoto();
+    if (photoUri) {
+      savePhoto(spot.id, photoUri);
+      Alert.alert('保存しました', 'スタンプ台帳で写真を見ることができます。');
+    }
   };
 
   return (
