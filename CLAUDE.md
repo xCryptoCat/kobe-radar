@@ -31,16 +31,31 @@ npx tsc --noEmit         # Check TypeScript errors (should be 0)
 ## Critical Architecture Patterns
 
 ### 1. Hook Composition Pattern (Radar System)
-The radar navigation system uses a **three-layer hook composition**:
+The radar navigation system uses a **three-layer hook composition** with advanced filtering:
 
-- `useLocation()` → GPS tracking with expo-location
-- `useCompass()` → Magnetometer heading with low-pass filter (alpha=0.15)
-- `useRadar(targetCoords, onArrival)` → **Combines both** + geo calculations
+- `useLocation()` → GPS tracking with **Kalman filtering** for smooth, accurate position
+  - Real-time GPS smoothing (reduces ±5-15m jitter to sub-meter stability)
+  - Accuracy tracking (±X meters from GPS metadata)
+  - Speed tracking (m/s) for ETA calculations
+  - Large jump detection (prevents smoothing over GPS glitches)
+
+- `useCompass()` → Magnetometer heading with **Circular EMA smoothing**
+  - Handles 0°/360° wraparound correctly
+  - Smoothing factor (alpha=0.15) balances stability/responsiveness
+  - True heading with magnetic declination correction
+  - Compass accuracy metadata
+
+- `useRadar(targetCoords, onArrival)` → **Combines both** + advanced geo calculations
+  - Vincenty formula for high-precision distance (accounts for Earth's ellipsoid)
+  - Real-time ETA calculation based on movement speed
+  - Journey progress tracking (0-100%)
+  - Hysteresis for zone changes (prevents flickering)
+  - Proximity-based haptic feedback
 
 **Important**: `useRadar` uses `useRef` for callback stability to prevent infinite loops. When modifying:
 - Never add callbacks directly to dependency arrays
 - Use functional `setState` with threshold checks (only update if distance/angle changes >1 unit)
-- See `src/hooks/useRadar.ts:32-46` for pattern
+- See `RADAR_OPTIMIZATIONS.md` for detailed technical documentation
 
 ### 2. State Management Architecture
 Uses **Zustand with persist middleware** to AsyncStorage:

@@ -5,9 +5,12 @@ import { useLocation } from './useLocation';
 import { useCompass } from './useCompass';
 import {
   calculateDistance,
+  calculateDistanceVincenty,
   calculateBearing,
   calculateRelativeAngle,
   getProximityZoneWithHysteresis,
+  calculateETA,
+  calculateProgress,
   ARRIVAL_THRESHOLD,
 } from '../utils/geo';
 
@@ -15,18 +18,25 @@ export const useRadar = (
   targetCoords: Coordinates,
   onArrival?: () => void
 ) => {
-  const { location: userLocation, gpsHeading } = useLocation();
-  const { heading: compassHeading } = useCompass();
+  const { location: userLocation, gpsHeading, accuracy, speed } = useLocation();
+  const { heading: compassHeading, accuracy: compassAccuracy } = useCompass();
   // Prefer compass (points where phone faces), fall back to GPS heading
   // (direction of travel) when magnetometer is unavailable
   const heading = compassHeading ?? gpsHeading;
+
   const [radarData, setRadarData] = useState<RadarData>({
     distance: 0,
     relativeAngle: 0,
     proximityZone: 'far',
     userLocation: null,
     heading: null,
+    accuracy: null,
+    speed: null,
+    eta: null,
   });
+
+  // Track initial distance for progress calculation
+  const initialDistanceRef = useRef<number | null>(null);
 
   // Debounced arrival detection (3 seconds sustained)
   const arrivalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -44,11 +54,23 @@ export const useRadar = (
       return;
     }
 
-    const distance = calculateDistance(userLocation, targetCoords);
+    // Use Vincenty formula for more accurate distance (especially over longer distances)
+    const distance = calculateDistanceVincenty(userLocation, targetCoords);
     const bearing = calculateBearing(userLocation, targetCoords);
     const relativeAngle = heading !== null
       ? calculateRelativeAngle(bearing, heading)
       : 0;
+
+    // Calculate ETA based on current speed
+    const eta = calculateETA(distance, speed);
+
+    // Track initial distance for progress calculation
+    if (initialDistanceRef.current === null) {
+      initialDistanceRef.current = distance;
+    }
+
+    // Calculate journey progress
+    const progress = calculateProgress(distance, initialDistanceRef.current);
 
     setRadarData((prev) => {
       // Calculate proximity zone with hysteresis to prevent flickering
@@ -60,14 +82,20 @@ export const useRadar = (
       const angleDiff = Math.abs(prev.relativeAngle - relativeAngle);
       const angleChanged = Math.min(angleDiff, 360 - angleDiff) > 1;
       const zoneChanged = prev.proximityZone !== proximityZone;
+      const accuracyChanged = prev.accuracy !== accuracy;
+      const speedChanged = prev.speed !== speed;
 
-      if (distanceChanged || angleChanged || zoneChanged || !prev.userLocation) {
+      if (distanceChanged || angleChanged || zoneChanged || accuracyChanged || speedChanged || !prev.userLocation) {
         return {
           distance,
           relativeAngle,
           proximityZone,
           userLocation,
           heading,
+          accuracy,
+          speed,
+          eta,
+          progress,
         };
       }
       return prev;
@@ -97,7 +125,7 @@ export const useRadar = (
         arrivalTimeoutRef.current = null;
       }
     }
-  }, [userLocation, heading, targetCoords]);
+  }, [userLocation, heading, targetCoords, accuracy, speed]);
 
   // Cleanup
   useEffect(() => {

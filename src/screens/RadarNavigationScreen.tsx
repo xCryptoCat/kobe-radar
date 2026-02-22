@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { SafeAreaWrapper } from '../components/common/SafeAreaWrapper';
 import { ScreenHeader } from '../components/common/ScreenHeader';
 import { ActionButton } from '../components/common/ActionButton';
 import { BannerAdWrapper } from '../components/common/BannerAdWrapper';
 import { RadarContainer } from '../components/radar/RadarContainer';
+import { GPSAccuracyIndicator } from '../components/radar/GPSAccuracyIndicator';
+import { NavigationStats } from '../components/radar/NavigationStats';
 import { RadarNavigationScreenProps } from '../types/navigation';
 import { useRadar } from '../hooks/useRadar';
-import { useSpotStore } from '../store/spotStore';
 import { formatDistance, formatCoordinates } from '../utils/format';
+import { proximityHaptics } from '../utils/haptics';
 import { theme } from '../constants/theme';
 import * as Haptics from 'expo-haptics';
 
@@ -19,6 +21,7 @@ export const RadarNavigationScreen: React.FC<RadarNavigationScreenProps> = ({
   const { spot } = route.params;
 
   const handleArrival = () => {
+
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     navigation.replace('ArrivalCelebration', { spot });
   };
@@ -28,10 +31,21 @@ export const RadarNavigationScreen: React.FC<RadarNavigationScreenProps> = ({
     handleArrival
   );
 
-  // Check if destination is visited and determine dot color
-  const { isVisited } = useSpotStore();
-  const visited = isVisited(spot.id);
-  const dotColor = visited ? theme.colors.status.visited : spot.color;
+  // Trigger haptic feedback on proximity zone changes
+  const previousZoneRef = useRef(radarData.proximityZone);
+  useEffect(() => {
+    if (previousZoneRef.current !== radarData.proximityZone) {
+      proximityHaptics.onZoneChange(radarData.proximityZone);
+      previousZoneRef.current = radarData.proximityZone;
+    }
+  }, [radarData.proximityZone]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      proximityHaptics.reset();
+    };
+  }, []);
 
   const handleCancel = () => {
     navigation.goBack();
@@ -42,20 +56,30 @@ export const RadarNavigationScreen: React.FC<RadarNavigationScreenProps> = ({
       <ScreenHeader title={`${spot.nameJa}探索中`} />
       <View style={styles.container}>
         <View style={styles.coordinateBar}>
-          {radarData.userLocation ? (
-            <>
-              <Text style={styles.coordinateText}>
-                {formatCoordinates(
-                  radarData.userLocation.latitude,
-                  radarData.userLocation.longitude
-                )}
-              </Text>
-              <Text style={styles.distanceSmall}>
-                距離: {formatDistance(radarData.distance)}
-              </Text>
-            </>
-          ) : (
-            <Text style={styles.coordinateText}>位置情報を取得中...</Text>
+          <View style={styles.topRow}>
+            {radarData.userLocation ? (
+              <>
+                <Text style={styles.coordinateText}>
+                  {formatCoordinates(
+                    radarData.userLocation.latitude,
+                    radarData.userLocation.longitude
+                  )}
+                </Text>
+                <GPSAccuracyIndicator
+                  accuracy={radarData.accuracy}
+                  speed={radarData.speed}
+                />
+              </>
+            ) : (
+              <Text style={styles.coordinateText}>位置情報を取得中...</Text>
+            )}
+          </View>
+          {radarData.userLocation && (
+            <NavigationStats
+              eta={radarData.eta}
+              progress={radarData.progress}
+              distance={radarData.distance}
+            />
           )}
         </View>
         <View style={styles.radarContainer}>
@@ -64,15 +88,15 @@ export const RadarNavigationScreen: React.FC<RadarNavigationScreenProps> = ({
             size={300}
             destinationDistance={radarData.distance}
             destinationAngle={radarData.relativeAngle}
-            destinationColor={dotColor}
+            destinationColor={theme.colors.accent.cyan}
             destinationName={spot.nameJa}
-            heading={radarData.heading}
+            heading={radarData.heading ?? undefined}
           />
         </View>
         <View style={styles.controlsContainer}>
           <Text style={styles.distanceText}>
             {formatDistance(radarData.distance)}
-          </Text>
+          </Text> 
           <ActionButton
             title="探索を中止"
             onPress={handleCancel}
@@ -93,15 +117,17 @@ const styles = StyleSheet.create({
   coordinateBar: {
     padding: theme.spacing.md,
     backgroundColor: theme.colors.background.secondary,
+    gap: theme.spacing.sm,
+  },
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   coordinateText: {
     color: theme.colors.text.secondary,
     fontSize: theme.fontSize.sm,
-    marginBottom: theme.spacing.xs,
-  },
-  distanceSmall: {
-    color: theme.colors.text.muted,
-    fontSize: theme.fontSize.xs,
+    flex: 1,
   },
   radarContainer: {
     flex: 1,

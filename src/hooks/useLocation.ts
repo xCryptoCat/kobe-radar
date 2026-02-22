@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import * as Location from 'expo-location';
 import { Coordinates } from '../types/spot';
+import { CoordinateKalmanFilter } from '../utils/kalman';
 
 export const useLocation = () => {
   const [location, setLocation] = useState<Coordinates | null>(null);
@@ -12,6 +13,11 @@ export const useLocation = () => {
   >(null);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+  const [speed, setSpeed] = useState<number | null>(null);
+
+  // Kalman filter for GPS smoothing
+  const kalmanFilterRef = useRef<CoordinateKalmanFilter | null>(null);
 
   useEffect(() => {
     let subscription: Location.LocationSubscription | null = null;
@@ -41,10 +47,31 @@ export const useLocation = () => {
             mayShowUserSettingsDialog: true,
           },
           (newLocation) => {
+            const rawLat = newLocation.coords.latitude;
+            const rawLng = newLocation.coords.longitude;
+            const gpsAccuracy = newLocation.coords.accuracy ?? undefined;
+
+            // Initialize Kalman filter on first reading
+            if (!kalmanFilterRef.current) {
+              kalmanFilterRef.current = new CoordinateKalmanFilter(rawLat, rawLng);
+            }
+
+            // Apply Kalman filtering for smooth, accurate position
+            const filtered = kalmanFilterRef.current.update(
+              rawLat,
+              rawLng,
+              gpsAccuracy
+            );
+
             setLocation({
-              latitude: newLocation.coords.latitude,
-              longitude: newLocation.coords.longitude,
+              latitude: filtered.latitude,
+              longitude: filtered.longitude,
             });
+
+            // Store GPS accuracy and speed
+            setAccuracy(gpsAccuracy ?? null);
+            setSpeed(newLocation.coords.speed ?? null);
+
             // GPS-derived heading (direction of travel, -1 when unavailable)
             const h = newLocation.coords.heading;
             setGpsHeading(h != null && h >= 0 ? h : null);
@@ -87,5 +114,5 @@ export const useLocation = () => {
     return () => subscription.remove();
   }, [permissionDenied]);
 
-  return { location, gpsHeading, error, permissionStatus };
+  return { location, gpsHeading, error, permissionStatus, accuracy, speed };
 };

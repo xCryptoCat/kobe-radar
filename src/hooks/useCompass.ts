@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as Location from 'expo-location';
+import { CircularEMA } from '../utils/smoothing';
 
 /**
  * Compass hook using the OS heading API (Location.watchHeadingAsync).
@@ -11,10 +12,17 @@ import * as Location from 'expo-location';
  *
  * Returns trueHeading (corrected for magnetic declination) when available,
  * otherwise falls back to magHeading (magnetic north).
+ *
+ * Enhanced with circular EMA smoothing to reduce compass jitter while
+ * maintaining responsiveness to actual rotation.
  */
 export const useCompass = () => {
   const [heading, setHeading] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+
+  // Circular EMA filter for smooth heading (handles 0°/360° wraparound)
+  const smoothingRef = useRef<CircularEMA>(new CircularEMA(0.15));
 
   useEffect(() => {
     let subscription: Location.LocationSubscription | null = null;
@@ -25,10 +33,15 @@ export const useCompass = () => {
           // trueHeading: relative to true north (accounts for magnetic declination)
           // magHeading: relative to magnetic north
           // trueHeading is -1 when unavailable (no GPS fix yet for declination)
-          const h = headingData.trueHeading >= 0
+          const rawHeading = headingData.trueHeading >= 0
             ? headingData.trueHeading
             : headingData.magHeading;
-          setHeading(h);
+
+          // Apply circular smoothing to reduce compass jitter
+          const smoothedHeading = smoothingRef.current.update(rawHeading);
+
+          setHeading(smoothedHeading);
+          setAccuracy(headingData.accuracy);
           setError(null);
         });
       } catch (err) {
@@ -45,5 +58,5 @@ export const useCompass = () => {
     };
   }, []);
 
-  return { heading, error };
+  return { heading, error, accuracy };
 };

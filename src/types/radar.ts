@@ -6,4 +6,8 @@ export interface RadarData {
   proximityZone: ProximityZone;
   userLocation: { latitude: number; longitude: number } | null;
   heading: number | null;
+  accuracy: number | null; // GPS accuracy in meters
+  speed: number | null; // Speed in meters per second
+  eta: number | null; // Estimated time of arrival in seconds
+  progress?: number; // Journey progress percentage (0-100)
 }
